@@ -22,14 +22,14 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * @param prettyblocks $module
+ * @param PrettyBlocks $module
  *
- * @return bool|string
+ * @return bool
  *
  * @throws PrestaShopDatabaseException
  * @throws PrestaShopException
  */
-function upgrade_module_3_0_2($module)
+function upgrade_module_3_0_2(PrettyBlocks $module)
 {
     Configuration::deleteByName('_PRETTYBLOCKS_TOKEN_');
     Configuration::updateGlobalValue('_PRETTYBLOCKS_TOKEN_', Tools::passwdGen(25));

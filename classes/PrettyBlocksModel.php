@@ -23,20 +23,22 @@ use PrestaSafe\PrettyBlocks\Core\PrettyBlocksField;
  */
 class PrettyBlocksModel extends ObjectModel
 {
-    public $id_prettyblocks;
-    public $instance_id;
-    public $code;
-    public $default_params;
-    public $template;
-    public $config;
-    public $state;
-    public $name;
-    public $zone_name;
-    public $position;
+    public int $id_prettyblocks;
+    public string $instance_id;
+    public string $code;
+    public string $default_params;
+    public string $template;
+    public string $config;
+    public string $state;
+    public string $name;
+    public string $zone_name;
+    public int $position;
+    /** @var int|null Shop ID */
     public $id_shop;
+    /** @var int|null Language ID */
     public $id_lang;
-    public $date_add;
-    public $date_upd;
+    public ?string $date_add;
+    public ?string $date_upd;
 
     public $configFields = [];
     public $stateFields = [];
@@ -75,7 +77,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return array
      */
-    public static function loadBlock($code)
+    public static function loadBlock(string $code)
     {
         $blocks = self::getBlocksAvailable();
 
@@ -98,7 +100,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return bool
      */
-    public function removeConfig()
+    public function removeConfig(): bool
     {
         $id = (int) $this->id_prettyblocks;
 
@@ -130,14 +132,14 @@ class PrettyBlocksModel extends ObjectModel
     /**
      * Display blocks for one zone
      *
-     * @param zone_name|string
-     * @param context|string : back or front (different results)
-     * @param id_lang|int
-     * @param id_shop|int
+     * @param string $zone_name
+     * @param string $context back or front (different results)
+     * @param ?int $id_lang
+     * @param ?int $id_shop
      *
      * @return array
      */
-    public static function getInstanceByZone($zone_name, $context = 'back', $id_lang = null, $id_shop = null)
+    public static function getInstanceByZone(string $zone_name, string $context = 'back', ?int $id_lang = null, ?int $id_shop = null)
     {
         $contextPS = Context::getContext();
 
@@ -172,7 +174,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return bool
      */
-    public function saveConfigField($name, $new_value)
+    public function saveConfigField(string $name, $new_value)
     {
         if (isset($this->configFields[$name])) {
             $newField = $this->configFields[$name]->setAttribute('new_value', $new_value)->compile();
@@ -198,7 +200,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return bool
      */
-    public function saveStateField($index, $name, $new_value)
+    public function saveStateField($index, $name, $new_value): bool
     {
         // get state in json, replace it if exist and save model.
         if (isset($this->stateFields[$index][$name])) {
@@ -218,8 +220,10 @@ class PrettyBlocksModel extends ObjectModel
 
     /**
      * Mapped block repeater with states.
+     *
+     * @return array<string,mixed>
      */
-    public function mergeStateWithFields()
+    public function mergeStateWithFields(): array
     {
         $context = Context::getContext();
         // $id_lang = ($id_lang !== null) ? (int)$id_lang : $context->language->id;
@@ -264,7 +268,7 @@ class PrettyBlocksModel extends ObjectModel
         return $block;
     }
 
-    public function _formatConfig($block, $context = 'front')
+    public function _formatConfig(array $block, string $context = 'front')
     {
         $formatted = [];
         $this->assignFields($block, $context);
@@ -282,8 +286,10 @@ class PrettyBlocksModel extends ObjectModel
 
     /**
      * set Fields config fields to the model
+     *
+     * @param array<string,mixed> $fields
      */
-    public function setConfigFields($fields)
+    public function setConfigFields(array $fields): void
     {
         $this->configFields = $fields;
     }
@@ -291,13 +297,13 @@ class PrettyBlocksModel extends ObjectModel
     /**
      * get Fields config fields to the model
      *
-     * @param block|array
-     * @param context|string : back or front (different results)
-     * @param force_values|bool : force values from db
+     * @param array|bool $block
+     * @param string $context back or front (different results)
+     * @param bool $force_values force values from db
      *
-     * @return $this
+     * @return self
      */
-    public function assignFields($block = false, $context = 'front', $force_values = false)
+    public function assignFields($block = false, string $context = 'front', bool $force_values = false): self
     {
         ++$this->count;
         if (!$block) {
@@ -314,9 +320,11 @@ class PrettyBlocksModel extends ObjectModel
     /**
      * generate field config in json
      *
-     * @param returnJson|bool : return json or array
+     * @param bool $returnJson return json or array
+     *
+     * @return string|array<mixed>
      */
-    public function generateJsonConfig($returnJson = true)
+    public function generateJsonConfig(bool $returnJson = true)
     {
         $output = [];
         foreach ($this->configFields as $key => $field) {
@@ -332,8 +340,10 @@ class PrettyBlocksModel extends ObjectModel
 
     /**
      * get the selected template
+     *
+     * @param array<string,mixed> $block
      */
-    private function _getTemplateSelected($block)
+    private function _getTemplateSelected(array $block): string
     {
         $id_prettyblocks = (int) $block['id_prettyblocks'];
         $key = Tools::strtoupper($id_prettyblocks . '_template');
@@ -349,8 +359,13 @@ class PrettyBlocksModel extends ObjectModel
 
     /**
      * Set template chosen in Vue App
+     *
+     * @param array<string,mixed> $block
+     * @param string $template_name
+     *
+     * @return bool Update result
      */
-    private function _setConfigTemplate($block, $template_name)
+    private function _setConfigTemplate(array $block, string $template_name): bool
     {
         $id_prettyblocks = (int) $block['id_prettyblocks'];
         $key = Tools::strtoupper($id_prettyblocks . '_template');
@@ -749,7 +764,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return string
      */
-    public static function formatFrontSelector($collection, $selector = null)
+    public static function formatFrontSelector($collection, ?string $selector = null): string
     {
         $selectorregex = ($selector !== null) ? $selector : '{primary} - {name}';
         // $regex = "/\{[a-zA-Z]+\}/";
@@ -772,12 +787,12 @@ class PrettyBlocksModel extends ObjectModel
     /**
      * registerBlockToZone - Insert a block in a zone
      *
-     * @param $zone_name String
-     * @param $block_name String
+     * @param $zone_name string
+     * @param $block_name string
      *
-     * @return PrettyBlocksModel
+     * @return self
      */
-    public static function registerBlockToZone($zone_name, $block_code, $id_lang = null, $id_shop = null)
+    public static function registerBlockToZone(string $zone_name, string $block_code, ?int $id_lang = null, ?int $id_shop = null): self
     {
         $contextPS = Context::getContext();
         $id_lang = ($id_lang !== null) ? (int) $id_lang : $contextPS->language->id;
@@ -817,7 +832,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return bool
      */
-    private function setDefaultConfigValues($block)
+    private function setDefaultConfigValues($block): void
     {
         $this->assignFields($block, 'back', true);
 
@@ -831,12 +846,12 @@ class PrettyBlocksModel extends ObjectModel
      * moveBlockToZone
      * move a block to another zone
      *
-     * @param $id_prettyblocks int
-     * @param $zone_name string
-     * @param $id_lang int
-     * @param $id_shop int
+     * @param int $id_prettyblocks
+     * @param string $zone_name
+     * @param int $id_lang
+     * @param int $id_shop
      */
-    public function moveBlockToZone($id_prettyblocks, $zone_name, $id_lang, $id_shop)
+    public function moveBlockToZone(int $id_prettyblocks, string $zone_name, int $id_lang, int $id_shop): bool
     {
         $contextPS = Context::getContext();
         $id_lang = ($id_lang !== null) ? (int) $id_lang : $contextPS->language->id;
@@ -849,16 +864,19 @@ class PrettyBlocksModel extends ObjectModel
         return $model->save();
     }
 
-    public static function copyZone($zone_name, $zone_name_to_paste, $id_lang, $id_shop)
+    /**
+     * @return array<mixed>
+     */
+    public static function copyZone(string $zone_name, string $zone_name_to_paste, int $id_lang, int $id_shop): array
     {
         $db = Db::getInstance();
         $query = new DbQuery();
         $query->from('prettyblocks');
-        $query->where('zone_name = \'' . $zone_name . '\'');
+        $query->where('zone_name = "' . pSQL($zone_name) . '"');
         $query->where('id_lang = ' . (int) $id_lang);
         $query->where('id_shop = ' . (int) $id_shop);
         $results = $db->executeS($query);
-        $result = true;
+        $errors = [];
 
         foreach ($results as $row) {
             $model = new PrettyBlocksModel(null, $id_lang, $id_shop);
@@ -884,12 +902,12 @@ class PrettyBlocksModel extends ObjectModel
      * deleteBlocksFromZone
      * delete all blocks from a zone
      */
-    public static function deleteBlocksFromZone($zone_name, $id_lang, $id_shop)
+    public static function deleteBlocksFromZone(string $zone_name, int $id_lang, int $id_shop): bool
     {
         $db = Db::getInstance();
         $query = new DbQuery();
         $query->from('prettyblocks');
-        $query->where('zone_name = \'' . $zone_name . '\'');
+        $query->where('zone_name = "' . pSQL($zone_name) . '"');
         $query->where('id_lang = ' . (int) $id_lang);
         $query->where('id_shop = ' . (int) $id_shop);
         $query->type('DELETE');
@@ -905,7 +923,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return void
      */
-    public function add($auto_date = true, $null_values = false)
+    public function add(bool $auto_date = true, bool $null_values = false): bool
     {
         $this->position = (int) DB::getInstance()->getValue('SELECT MAX(position)  FROM `' . _DB_PREFIX_ . 'prettyblocks`') + 1;
         parent::add();
@@ -919,7 +937,7 @@ class PrettyBlocksModel extends ObjectModel
      *
      * @return array
      */
-    public static function getThemeSettings($with_tabs = true, $context = 'front', $id_shop = null)
+    public static function getThemeSettings(bool $with_tabs = true, string $context = 'front', ?int $id_shop = null): array
     {
         $context = Context::getContext();
         $id_shop = ($id_shop !== null) ? (int) $id_shop : $context->shop->id;

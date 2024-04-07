@@ -22,29 +22,44 @@ namespace PrestaSafe\PrettyBlocks\Utils;
 
 class Block
 {
+    /** @var array<int,mixed> */
     public $fields;
-    public $state = [];
-    public $need_reload = false;
-    public $inputs = [];
 
-    public function registerFields($fields)
+    /** @var array<int,mixed> */
+    public array $state = [];
+
+    public bool $need_reload = false;
+
+    /** @var array<int,mixed> */
+    public array $inputs = [];
+
+    /**
+     * @param array<int,mixed> $fields
+     */
+    public function registerFields(array $fields): void
     {
     }
 
-    public function setInput(array $array)
+    /**
+     * @param array<int,mixed> $array
+     */
+    public function setInput(array $array): void
     {
         $this->inputs[] = $array;
     }
 
-    public function getField($name)
+    public function getField(string $name): void
     {
     }
 
-    public function getCollection($field_name)
+    public function getCollection(string $field_name): void
     {
     }
 
-    public function getState()
+    /**
+     * @return array<int,mixed>
+     */
+    public function getState(): array
     {
         return $this->state;
     }

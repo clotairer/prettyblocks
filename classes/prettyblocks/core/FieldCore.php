@@ -187,7 +187,7 @@ class FieldCore
     /**
      * format
      *
-     * @return any
+     * @return mixed
      */
     public function format()
     {
@@ -203,7 +203,7 @@ class FieldCore
     /**
      * formatForFront
      *
-     * @return any
+     * @return mixed
      */
     public function formatForFront()
     {
@@ -226,9 +226,9 @@ class FieldCore
     /**
      * formatFieldTitle
      *
-     * @return void
+     * @return array<string,mixed>
      */
-    public function formatFieldTitle()
+    public function formatFieldTitle(): array
     {
         // if value exists in DB and new_value is empty
         if (!is_null($this->value) && is_null($this->new_value)) {
@@ -247,9 +247,9 @@ class FieldCore
      *
      * @param array $array
      *
-     * @return array
+     * @return array<string,mixed>
      */
-    public function secureTitleEntry($array)
+    public function secureTitleEntry($array): array
     {
         if (!is_array($array)) {
             $secure = [];
@@ -625,7 +625,7 @@ class FieldCore
     /**
      * formatFieldSelector
      *
-     * @return string|bool
+     * @return array|bool
      */
     public function formatFieldSelector()
     {
@@ -675,9 +675,9 @@ class FieldCore
      *
      * @param array $array
      *
-     * @return array
+     * @return array<string,mixed>
      */
-    public function secureCollectionEntry($array)
+    public function secureCollectionEntry(array $array): array
     {
         $secure = [];
         $secure['show'] = [
@@ -697,7 +697,7 @@ class FieldCore
      *
      * @return string
      */
-    public function secureTextEntry($string)
+    public function secureTextEntry(string $string): string
     {
         if (is_array($string) && isset($string['value'])) {
             $string = $string['value'];
@@ -714,9 +714,9 @@ class FieldCore
      *
      * @param array $array
      *
-     * @return array
+     * @return array<string,string>
      */
-    public function secureFileUploadEntry($array)
+    public function secureFileUploadEntry(array $array): array
     {
         $secure = [];
         $url = '';

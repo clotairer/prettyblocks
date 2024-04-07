@@ -22,14 +22,14 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * @param prettyblocks $module
+ * @param PrettyBlocks $module
  *
- * @return bool|string
+ * @return bool
  *
  * @throws PrestaShopDatabaseException
  * @throws PrestaShopException
  */
-function upgrade_module_3_0_0($module)
+function upgrade_module_3_0_0(PrettyBlocks $module)
 {
     if (!PrettyBlocksMigrate::tableExists('prettyblocks_settings')) {
         $module->makeSettingsTable();

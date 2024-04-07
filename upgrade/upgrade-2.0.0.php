@@ -22,14 +22,14 @@ if (!defined('_PS_VERSION_')) {
 }
 
 /**
- * @param prettyblocks $module
+ * @param PrettyBlocks $module
  *
  * @return bool|string
  *
  * @throws PrestaShopDatabaseException
  * @throws PrestaShopException
  */
-function upgrade_module_2_0_0($module)
+function upgrade_module_2_0_0(PrettyBlocks $module)
 {
     return PrettyBlocksMigrate::migrateConfig();
 }

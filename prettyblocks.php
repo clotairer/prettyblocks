@@ -29,12 +29,15 @@ if (file_exists(__DIR__ . '/vendor/autoload.php')) {
 
 class PrettyBlocks extends Module implements WidgetInterface
 {
-    public $js_path;
-    public $css_path;
-    public $dev_ps = true;
-    public $valid_types = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'pdf'];
-    public $upload_dir = __DIR__ . '/views/images/';
-    public $form_trans = [];
+    public string $js_path;
+    public string $css_path;
+    public bool $dev_ps = true;
+    /** @var string[] */
+    public array $valid_types = ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp', 'pdf'];
+    public string $upload_dir = __DIR__ . '/views/images/';
+    /** @var string[] */
+    public array $form_trans = [];
+    /** @var (string|true)[][] */
     public $tabs = [
         [
             'name' => 'Pretty Blocks', // One name for all langs
@@ -43,7 +46,7 @@ class PrettyBlocks extends Module implements WidgetInterface
             'parent_class_name' => 'IMPROVE',
         ],
     ];
-
+    /** @var string[] */
     public $hooks = [
         'displayHome',
         'displayFooter',
@@ -75,7 +78,7 @@ class PrettyBlocks extends Module implements WidgetInterface
         $this->ps_versions_compliancy = ['min' => '1.7', 'max' => _PS_VERSION_];
     }
 
-    public function isUsingNewTranslationSystem()
+    public function isUsingNewTranslationSystem(): bool
     {
         return true;
     }
@@ -85,7 +88,7 @@ class PrettyBlocks extends Module implements WidgetInterface
      *
      * @return bool
      */
-    private function createBlockDb()
+    private function createBlockDb(): bool
     {
         $db = [];
         $db[] = 'CREATE TABLE IF NOT EXISTS `' . _DB_PREFIX_ . 'prettyblocks` (
@@ -108,14 +111,14 @@ class PrettyBlocks extends Module implements WidgetInterface
 
         $isOk = true;
         foreach ($db as $sql) {
-            $isOk &= Db::getInstance()->execute($sql);
+            $isOk = $isOk && Db::getInstance()->execute($sql);
         }
-        $isOk &= $this->makeSettingsTable();
+        $isOk = $isOk && $this->makeSettingsTable();
 
         return $isOk;
     }
 
-    public function makeSettingsTable()
+    public function makeSettingsTable(): bool
     {
         $sql = 'CREATE TABLE `' . _DB_PREFIX_ . 'prettyblocks_settings` (
             `id_prettyblocks_settings` int(11) unsigned NOT NULL AUTO_INCREMENT,
@@ -134,7 +137,7 @@ class PrettyBlocks extends Module implements WidgetInterface
      *
      * @return bool
      */
-    private function removeDb()
+    private function removeDb(): bool
     {
         $db = [];
         $db[] = 'DROP TABLE IF EXISTS `' . _DB_PREFIX_ . 'prettyblocks`';
@@ -143,12 +146,17 @@ class PrettyBlocks extends Module implements WidgetInterface
 
         $isOk = true;
         foreach ($db as $sql) {
-            $isOk &= Db::getInstance()->execute($sql);
+            $isOk = $isOk && Db::getInstance()->execute($sql);
         }
 
         return $isOk;
     }
 
+    /**
+     * getContent
+     *
+     * @return mixed
+     */
     public function getContent()
     {
         $domain = Tools::getShopDomainSsl(true);
@@ -160,12 +168,17 @@ class PrettyBlocks extends Module implements WidgetInterface
         return Tools::redirect($symfonyUrl);
     }
 
+    /**
+     * loadDefault
+     *
+     * @return mixed
+     */
     private function loadDefault()
     {
         return Configuration::updateGlobalValue('_PRETTYBLOCKS_TOKEN_', Tools::passwdGen(25));
     }
 
-    public function install()
+    public function install(): bool
     {
         return parent::install()
             && $this->loadDefault()
@@ -173,13 +186,18 @@ class PrettyBlocks extends Module implements WidgetInterface
             && $this->registerHook($this->hooks);
     }
 
-    public function uninstall()
+    public function uninstall(): bool
     {
         return parent::uninstall()
             && $this->removeDb();
     }
 
-    public function hookActionFrontControllerSetVariables()
+    /**
+     * hookActionFrontControllerSetVariables
+     *
+     * @return array<string,mixed>
+     */
+    public function hookActionFrontControllerSetVariables(): array
     {
         return [
             // 'ajax_builder_url' => $this->context->link->getModuleLink($this->name,'ajax'),
@@ -193,9 +211,12 @@ class PrettyBlocks extends Module implements WidgetInterface
     /**
      * Generate $state to block view
      *
-     * @return array
+     * @param mixed $hookName
+     * @param array<string,mixed> $configuration
+     *
+     * @return array<string,mixed>
      */
-    public function getWidgetVariables($hookName = null, array $configuration = [])
+    public function getWidgetVariables($hookName = null, array $configuration = []): array
     {
         $block = (isset($configuration['block'])) ? PrettyBlocksModel::loadBlock($configuration['block']) : [];
 
@@ -206,7 +227,7 @@ class PrettyBlocks extends Module implements WidgetInterface
         ];
     }
 
-    public function hookdisplayHeader($params)
+    public function hookdisplayHeader(): void
     {
         if ((isset($_SERVER['HTTP_SEC_FETCH_DEST']) && $_SERVER['HTTP_SEC_FETCH_DEST'] == 'iframe') || Tools::getValue('prettyblocks') === '1') {
             $this->context->controller->registerJavascript(
@@ -234,6 +255,11 @@ class PrettyBlocks extends Module implements WidgetInterface
 
     /**
      * Return la view
+     *
+     * @param mixed $hookName
+     * @param array<string,mixed> $configuration
+     *
+     * @return mixed
      */
     public function renderWidget($hookName = null, array $configuration = [])
     {
@@ -261,7 +287,7 @@ class PrettyBlocks extends Module implements WidgetInterface
         }
     }
 
-    public function registerBlockToZone($zone_name, $block_code)
+    public function registerBlockToZone(string $zone_name, string $block_code): PrettyBlocksModel
     {
         return PrettyBlocksModel::registerBlockToZone($zone_name, $block_code);
     }
@@ -269,7 +295,7 @@ class PrettyBlocks extends Module implements WidgetInterface
     /**
      * Hook dispatcher for registering smarty function
      */
-    public function hookActionDispatcher()
+    public function hookActionDispatcher(): void
     {
         /* @deprecated {magic_zone} is deprecated since v1.1.0. Use {prettyblocks_zone} instead. */
         $this->context->smarty->registerPlugin('function', 'magic_zone', [PrettyBlocks::class, 'renderZone']);
@@ -280,11 +306,11 @@ class PrettyBlocks extends Module implements WidgetInterface
     /**
      * Render dynamic title
      *
-     * @param array $params
+     * @param array<string,mixed> $params
      *
      * @return string
      */
-    public static function renderTitle($params)
+    public static function renderTitle(array $params): string
     {
         $tag = $params['tag'] ?? null;
         $value = $params['value'] ?? '';
@@ -301,7 +327,12 @@ class PrettyBlocks extends Module implements WidgetInterface
                 ->setValue($value)->render();
     }
 
-    public static function renderZone($params)
+    /**
+     * @param array<string,mixed> $params
+     *
+     * @return bool|string
+     */
+    public static function renderZone(array $params)
     {
         $zone_name = $params['zone_name'];
 
@@ -325,17 +356,19 @@ class PrettyBlocks extends Module implements WidgetInterface
     /**
      * Hook for adding theme settings
      * quick fix for adding tinyMCE api key.
+     *
+     * @return array<string,array>
      */
-    public function hookActionRegisterThemeSettings()
+    public function hookActionRegisterThemeSettings(): array
     {
         return [
-             'tinymce_api_key' => [
-                 'type' => 'text', // type of field
-                 'label' => $this->l('TinyMCE api key'), // label to display
-                 'description' => $this->l('Add your TinyMCE api key (free) https://www.tiny.cloud/pricing/'), // description to display
-                 'tab' => 'Settings',
-                 'default' => 'no-api-key', // default value (Boolean)
-             ],
-         ];
+            'tinymce_api_key' => [
+                'type' => 'text', // type of field
+                'label' => $this->l('TinyMCE api key'), // label to display
+                'description' => $this->l('Add your TinyMCE api key (free) https://www.tiny.cloud/pricing/'), // description to display
+                'tab' => 'Settings',
+                'default' => 'no-api-key', // default value (Boolean)
+            ],
+        ];
     }
 }
